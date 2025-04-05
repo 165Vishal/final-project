@@ -5,270 +5,152 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GrowTech Soil Monitoring</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            margin-top: 40px;
-        }
-        .container {
-            margin: 60px auto;
-            padding: 25px;
-            width: 50%;
-            background-color: #e1d8d8;
-            border-radius: 20px;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
-
-
-
-    <script>
-        function showCropForm() {
-            document.getElementById("crop_inputs").classList.remove("hidden");
-            document.getElementById("npk_inputs").classList.add("hidden");
-            document.getElementById("location_based_inputs").classList.add("hidden");
-        }
-
-        function showNpkForm() {
-            document.getElementById("npk_inputs").classList.remove("hidden");
-            document.getElementById("crop_inputs").classList.add("hidden");
-            document.getElementById("location_based_inputs").classList.add("hidden");
-        }
-
-        function showLocationBasedForm() {
-            document.getElementById("location_based_inputs").classList.remove("hidden");
-            document.getElementById("crop_inputs").classList.add("hidden");
-            document.getElementById("npk_inputs").classList.add("hidden");
-        }
-
-        function predict(model) {
-const url = model === "crop" ? "/predict_crop" : "/predict_npk";
-
-let data = model === "crop" ? {
-    nitrogen: document.getElementById("nitrogen").value,
-    phosphorus: document.getElementById("phosphorus").value,
-    potassium: document.getElementById("potassium").value,
-    ph: document.getElementById("ph").value,
-    humidity: document.getElementById("humidity").value
-} : {
-    ph: document.getElementById("ph_npk").value,
-    moisture: document.getElementById("moisture").value,
-    temperature: document.getElementById("temperature").value
-};
-
-fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-})
-.then(response => response.json())
-.then(data => {
-    if (model === "npk") {
-        document.getElementById("predicted_nitrogen").value = data.Nitrogen;
-        document.getElementById("predicted_phosphorus").value = data.Phosphorus;
-        document.getElementById("predicted_potassium").value = data.Potassium;
-    } 
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     
-    // Crop name to image mapping
-    const cropImages = {
-        "mothbeans": "/static/images/mothbeans.png",
-        "wheat": "/static/images/wheat.png",
-        "rice": "/static/images/rice.png",
-        "maize": "/static/images/maize.png",
-        "blackgram": "/static/images/blackgram.png",
-        "mungbeans": "/static/images/mungbeans.png",
-        "Soyabeans": "/static/images/Soyabeans.png",
-        
-        // Add more crops as needed
-    };
 
-    const cropKey = data.crop.toLowerCase();
-    const cropImage = cropImages[cropKey] || "/static/images/default.png";  
-
-    document.getElementById("predictionResult").innerHTML = `
-        <div style="border: 2px solid #4CAF50; padding: 15px; border-radius: 10px; 
-                    background-color: #f0fff0; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); text-align: center;">
-            <h3 style="color: #2E8B57;">🌱 Recommended Crop: 
-                <span style="font-weight: bold;">${data.crop}</span>
-            </h3>
-            <img src="${cropImage}" alt="${data.crop}" style="width: 200px; height: 200px; border-radius: 10px; margin-top: 10px;">
-            <p style="margin-top: 10px; font-style: italic;">${data.explanation}</p>
-        </div>`;
-})
-.catch(error => console.error("Error:", error));
-}
-
-
-
-
-        function predictPlant() {
-            let nitrogen = document.getElementById("predicted_nitrogen").value;
-            let phosphorus = document.getElementById("predicted_phosphorus").value;
-            let potassium = document.getElementById("predicted_potassium").value;
-            let ph = document.getElementById("ph_npk").value;
-            let humidity = document.getElementById("moisture").value;
-
-            let cropData = { nitrogen, phosphorus, potassium, ph, humidity };
-            
-            fetch("/predict_crop", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(cropData)
-})
-.then(response => response.json())
-.then(data => {
-    if (data.error) {
-        document.getElementById("predictionResult").innerHTML = `
-            <div style="color: red; font-weight: bold;">❌ Error: ${data.error}</div>`;
-    } else {
-        // Crop name to image mapping
-        const cropImages = {
-    "mothbeans": "/static/images/mothbeans.png",
-    "wheat": "/static/images/wheat.png",
-    "rice": "/static/images/rice.png",
-    "maize": "/static/images/maize.png",
-    // Add more crops as needed
-};
-
-// Convert crop name to lowercase to match filenames
-const cropKey = data.crop.toLowerCase();
-const cropImage = cropImages[cropKey] || "/static/images/default.png";  // Ensure a default.png exists
-
-document.getElementById("predictionResult").innerHTML = `
-    <div style="border: 2px solid #4CAF50; padding: 15px; border-radius: 10px; 
-                background-color: #f0fff0; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); text-align: center;">
-        <h3 style="color: #2E8B57;">🌱 Recommended Crop: 
-            <span style="font-weight: bold;">${data.crop}</span>
-        </h3>
-        <img src="${cropImage}" alt="${data.crop}" style="width: 200px; height: 200px; border-radius: 10px; margin-top: 10px;">
-        <p>${data.explanation}</p>
-    </div>`;
-
-    }
-});
-
-
-        }
-
-        function generateExplanation(crop) {
-            return "The recommended crop is " + crop + ". This crop is well-suited for the detected soil conditions, ensuring optimal growth and yield.";
-        }
-
-        // Location-Based Prediction Functions
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
-            } else {
-                alert("Geolocation is not supported by this browser.");
-            }
-        }
-
-        function showPosition(position) {
-            document.getElementById("latitude").value = position.coords.latitude;
-            document.getElementById("longitude").value = position.coords.longitude;
-        }
-
-        function showError(error) {
-            alert("Error fetching location. Please enter manually.");
-        }
-
-        function enableManualInput() {
-            document.getElementById("latitude").removeAttribute("readonly");
-            document.getElementById("longitude").removeAttribute("readonly");
-        }
-
-        function predictCrop() {
-            let lat = document.getElementById("latitude").value;
-            let lon = document.getElementById("longitude").value;
-
-            fetch('/predict_location', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `latitude=${lat}&longitude=${lon}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-    alert(data.error);
-} else {
-    document.getElementById("predictionResult").innerHTML = `
-        <div style="border: 2px solid #4CAF50; padding: 15px; border-radius: 10px; 
-                    background-color: #f0fff0; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);">
-            <h3 style="color: #2E8B57;">🌱 Recommended Crop: <span style="font-weight: bold;">${data.recommended_crop}</span></h3>
-            <p>🌡️ <b>Temperature:</b> ${data.temperature}°C</p>
-            <p>💧 <b>Humidity:</b> ${data.humidity}%</p>
-        </div>`;
-}
-
-            })
-            .catch(error => console.error("Error:", error));
-        }
-
-        // Fetch sensor data
-        function fetchSensorData() {
-            fetch("/get_latest_sensor_data")
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("ph_npk").value = data.ph;
-                    document.getElementById("moisture").value = data.moisture;
-                    document.getElementById("temperature").value = data.temperature;
-                })
-                .catch(error => console.error("Error fetching sensor data:", error));
-        }
-    </script>
 </head>
 <body>
-    <h1 style="font-family: Luminari, fantasy;">GrowTech Soil Monitoring System</h1>
-    
-    <button style="font-family: cursive;" class="btn btn-success" onclick="showCropForm()">Manual Soil Analysis </button>
-    <button style="font-family: cursive;"  class="btn btn-primary" onclick="showNpkForm()">Sensor-Based Soil Analysis</button>
-    <button style="font-family: cursive;"  class="btn btn-warning" onclick="showLocationBasedForm()">Location-Based Prediction</button>
-    
-    <!-- Crop Recommendation Form -->
-    <div id="crop_inputs" class="container hidden">
-        <h2 style="font-family: Georgia, serif;">Manual Soil Analysis </h2>
-        <input type="text" id="nitrogen" placeholder="Nitrogen">
-        <input type="text" id="phosphorus" placeholder="Phosphorus">
-        <input type="text" id="potassium" placeholder="Potassium">
-        <input type="text" id="ph" placeholder="pH Level">
-        <input type="text" id="humidity" placeholder="Humidity">
-        <button class="btn btn-success" onclick="predict('crop')">Predict</button>
+    <div id="loading" class="hidden">🔄 Predicting...</div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <div class="main-container">
+        <header>
+            <h1 class="main-title">GrowTech Soil Monitoring System</h1>
+            <p class="tagline">Smart farming solutions for better yields</p>
+        </header>
+        
+        <div class="button-container">
+            <button class="btn-custom btn-manual" onclick="showCropForm()">
+                <span class="btn-icon">🧪</span>
+                Manual Soil Analysis
+            </button>
+            <button class="btn-custom btn-sensor" onclick="showNpkForm()">
+                <span class="btn-icon">📊</span>
+                Sensor-Based Analysis
+            </button>
+            <button class="btn-custom btn-location" onclick="showLocationBasedForm()">
+                <span class="btn-icon">📍</span>
+                Location-Based Prediction
+            </button>
+        </div>
+        
+        <!-- Crop Recommendation Form -->
+        <div id="crop_inputs" class="form-container hidden">
+            <h2 class="section-title">Manual Soil Analysis</h2>
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <label for="nitrogen">Nitrogen (mg/kg)</label>
+                    <input type="text" id="nitrogen" placeholder="e.g., 40">
+                </div>
+                <div class="input-wrapper">
+                    <label for="phosphorus">Phosphorus (mg/kg)</label>
+                    <input type="text" id="phosphorus" placeholder="e.g., 50">
+                </div>
+                <div class="input-wrapper">
+                    <label for="potassium">Potassium (mg/kg)</label>
+                    <input type="text" id="potassium" placeholder="e.g., 30">
+                </div>
+                <div class="input-wrapper">
+                    <label for="ph">pH Level</label>
+                    <input type="text" id="ph" placeholder="e.g., 6.5">
+                </div>
+                <div class="input-wrapper">
+                    <label for="humidity">Humidity (%)</label>
+                    <input type="text" id="humidity" placeholder="e.g., 65">
+                </div>
+            </div>
+            <button class="submit-btn" onclick="predict('crop')">
+                <span class="btn-text">Predict Crop</span>
+            </button>
+        </div>
+
+        <!-- NPK Prediction Form -->
+        <div id="npk_inputs" class="form-container hidden">
+            <h2 class="section-title">Sensor-Based Soil Analysis</h2>
+            <div class="sensor-readings">
+                <h3>Sensor Readings</h3>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <label for="ph_npk">pH Level</label>
+                        <input type="text" id="ph_npk" placeholder="e.g., 6.5">
+                    </div>
+                    <div class="input-wrapper">
+                        <label for="moisture">Moisture (%)</label>
+                        <input type="text" id="moisture" placeholder="e.g., 35">
+                    </div>
+                    <div class="input-wrapper">
+                        <label for="temperature">Temperature (°C)</label>
+                        <input type="text" id="temperature" placeholder="e.g., 25">
+                    </div>
+                </div>
+                <button class="sensor-btn" onclick="fetchSensorData()">
+                    <span class="btn-icon">📡</span> Fill with Sensor Data
+                </button>
+            </div>
+            
+            <div class="prediction-results">
+                <h3>Predicted NPK Values</h3>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <label for="predicted_nitrogen">Nitrogen (mg/kg)</label>
+                        <input type="text" id="predicted_nitrogen" placeholder="Predicted Nitrogen" readonly>
+                    </div>
+                    <div class="input-wrapper">
+                        <label for="predicted_phosphorus">Phosphorus (mg/kg)</label>
+                        <input type="text" id="predicted_phosphorus" placeholder="Predicted Phosphorus" readonly>
+                    </div>
+                    <div class="input-wrapper">
+                        <label for="predicted_potassium">Potassium (mg/kg)</label>
+                        <input type="text" id="predicted_potassium" placeholder="Predicted Potassium" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="submit-btn" onclick="predict('npk')">
+                    <span class="btn-text">Predict NPK</span>
+                </button>
+                <button class="submit-btn btn-secondary" onclick="predictPlant()">
+                    <span class="btn-text">Recommend Crop</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Location-Based Prediction Form -->
+        <div id="location_based_inputs" class="form-container hidden">
+            <h2 class="section-title">Location-Based Crop Recommendation</h2>
+            <div class="location-inputs">
+                <div class="input-wrapper full-width">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" id="latitude" readonly>
+                </div>
+                <div class="input-wrapper full-width">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" id="longitude" readonly>
+                </div>
+            </div>
+            
+            <div class="location-buttons">
+                <button class="location-btn primary" onclick="getLocation()">
+                    <span class="btn-icon">📱</span> Use GPS Location
+                </button>
+                <button class="location-btn secondary" onclick="enableManualInput()">
+                    <span class="btn-icon">✏️</span> Enter Manually
+                </button>
+                <button class="submit-btn" onclick="predictCrop()">
+                    <span class="btn-text">Predict Crop</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="predictionResult" class="prediction-container"></div>
     </div>
 
-    <!-- NPK Prediction Form -->
-    <div id="npk_inputs" class="container hidden">
-        <h2 style="font-family: Georgia, serif;">Sensor-Based Soil Analysis</h2>
-        <input type="text" id="ph_npk" placeholder="pH Level">
-        <input type="text" id="moisture" placeholder="Moisture">
-        <input type="text" id="temperature" placeholder="Temperature">
-        <input type="text" id="predicted_nitrogen" placeholder="Predicted Nitrogen" readonly>
-        <input type="text" id="predicted_phosphorus" placeholder="Predicted Phosphorus" readonly>
-        <input type="text" id="predicted_potassium" placeholder="Predicted Potassium" readonly>
-        <button class="btn btn-secondary" onclick="fetchSensorData()">Fill with Sensor Data</button>
-        <button class="btn btn-primary" onclick="predict('npk')">Predict NPK</button>
-        <button class="btn btn-info" onclick="predictPlant()">Predict Plant</button>
-    </div>
-    <div id="predictionResult"></div>
+    <footer>
+        <p>© 2025 GrowTech Agricultural Solutions | Empowering Farmers with Technology</p>
+    </footer>
 
-
-    <!-- Location-Based Prediction Form -->
-    <div id="location_based_inputs" class="container hidden">
-        <h2 style="font-family: Georgia, serif;">Location-Based Crop Recommendation</h2>
-
-        <label class="form-label">Latitude:</label> 
-        <input type="text" id="latitude" class="form-control" readonly>
-
-        <label class="form-label mt-2">Longitude:</label> 
-        <input type="text" id="longitude" class="form-control" readonly>
-
-        <button class="btn btn-primary me-2" onclick="getLocation()">Use GPS Location</button>
-        <button class="btn btn-warning" onclick="enableManualInput()">Enter Location Manually</button>
-        <button class="btn btn-success mt-3" onclick="predictCrop()">Predict Crop</button>
-    </div>
-
-    <div class="mt-4 alert alert-info" id="predictionResult"></div>
+    <script src="script.js"></script>
 </body>
 </html>
