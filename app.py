@@ -179,6 +179,11 @@ def receive_sensor_data():
 def serve_static(filename):
     return send_from_directory(app.static_folder, filename)
 
+@app.route("/get_sensor_data", methods=["GET"])
+def get_sensor_data():
+    return jsonify(sensor_data_store), 200
+
+
 
 @app.route('/upload_sensor_data', methods=['POST'])
 def upload_sensor_data():
