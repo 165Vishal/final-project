@@ -203,5 +203,18 @@ def upload_sensor_data():
 def home():
     return render_template("index.html")
 
+sensor_data_store = {}
+
+@app.route('/update_sensor_data', methods=['POST'])
+def update_sensor_data():
+    global sensor_data_store
+    sensor_data_store = {
+        "ph": request.form.get("ph"),
+        "moisture": request.form.get("moisture"),
+        "temperature": request.form.get("temperature")
+    }
+    return jsonify({"status": "success"})
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
