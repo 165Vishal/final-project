@@ -110,7 +110,7 @@ def predict_crop_from_weather(temperature, humidity):
     else:
         return "Wheat"
 
-@app.route("/get_latest_sensor_data", methods=["GET"])
+@app.route("/get_sensor_data", methods=["GET"])
 def get_latest_sensor_data():
     return jsonify(sensor_data_store)
 
@@ -166,6 +166,8 @@ sensor_data_store = {"ph": 0, "moisture": 0, "temperature": 0}
 def receive_sensor_data():
     global sensor_data_store
     data = request.form if request.form else request.json  # Handle both form & JSON data
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
     try:
         sensor_data_store["ph"] = float(data["ph"])
         sensor_data_store["moisture"] = float(data["moisture"])

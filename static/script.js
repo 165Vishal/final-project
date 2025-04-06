@@ -59,6 +59,7 @@ function predict(model) {
         const cropImage = cropImages[cropKey] || "/static/images/default.png";  
 
         if (data.crop) {
+            document.getElementById("predictionResult").innerHTML = `<div class="loading">🔄 Predicting...</div>`;
             document.getElementById("predictionResult").innerHTML = `
                 <div class="crop-result">
                     <h3>🌱 Recommended Crop: <span>${data.crop}</span></h3>
@@ -106,6 +107,7 @@ function predictPlant() {
             const cropKey = data.crop.toLowerCase();
             const cropImage = cropImages[cropKey] || "/static/images/default.png";
 
+            document.getElementById("predictionResult").innerHTML = `<div class="loading">🔄 Predicting...</div>`;
             document.getElementById("predictionResult").innerHTML = `
                 <div class="crop-result">
                     <h3>🌱 Recommended Crop: <span>${data.crop}</span></h3>
@@ -180,12 +182,16 @@ function predictCrop() {
 
 // Fetch sensor data
 function fetchSensorData() {
-    fetch("/get_latest_sensor_data")
+    fetch('/get_sensor_data')
         .then(response => response.json())
         .then(data => {
-            document.getElementById("ph_npk").value = data.ph;
-            document.getElementById("moisture").value = data.moisture;
-            document.getElementById("temperature").value = data.temperature;
+            document.getElementById('ph_npk').value = data.ph;
+            document.getElementById('moisture').value = data.moisture;
+            document.getElementById('temperature').value = data.temperature;
         })
-        .catch(error => console.error("Error fetching sensor data:", error));
+        .catch(error => {
+            console.error('Error fetching sensor data:', error);
+        });
 }
+document.getElementById("predictionResult").innerHTML = `<div class="loading">🔄 Predicting...</div>`;
+
