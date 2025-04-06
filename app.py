@@ -179,6 +179,19 @@ def receive_sensor_data():
 def serve_static(filename):
     return send_from_directory(app.static_folder, filename)
 
+
+@app.route('/upload_sensor_data', methods=['POST'])
+def upload_sensor_data():
+    ph = request.form.get('ph')
+    moisture = request.form.get('moisture')
+    temperature = request.form.get('temperature')
+
+    print(f"Received Sensor Data - pH: {ph}, Moisture: {moisture}, Temperature: {temperature}")
+
+    # Optionally: Save to database, or pass to ML model here
+
+    return jsonify({"status": "success", "message": "Data received"}), 200
+
 @app.route("/")
 def home():
     return render_template("index.html")
