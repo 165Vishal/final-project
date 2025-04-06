@@ -95,13 +95,31 @@ function predictPlant() {
         } else {
             // Crop name to image mapping
             const cropImages = {
-                "mothbeans": "/static/images/mothbeans.png",
-                "wheat": "/static/images/wheat.png",
-                "rice": "/static/images/rice.png",
-                "maize": "/static/images/maize.png",
-                "blackgram": "/static/images/blackgram.png",
-                "mungbeans": "/static/images/mungbeans.png",
-                "Soyabeans": "/static/images/Soyabeans.png",
+                
+                    "apple": "/static/images/apple.png",
+                    "banana": "/static/images/banana.png",
+                    "blackgram": "/static/images/blackgram.png",
+                    "chickpea": "/static/images/chickpea.png",
+                    "coconut": "/static/images/coconut.png",
+                    "coffee": "/static/images/coffee.png",
+                    "cotton": "/static/images/cotton.png",
+                    "groundnuts": "/static/images/groundnuts.png",
+                    "jute": "/static/images/jute.png",
+                    "kidneybeans": "/static/images/kidneybeans.png",
+                    "lentil": "/static/images/lentil.png",
+                    "maize": "/static/images/maize.png",
+                    "mango": "/static/images/mango.png",
+                    "mothbeans": "/static/images/mothbeans.png",
+                    "mungbeans": "/static/images/mungbeans.png",
+                    "muskmelon": "/static/images/muskmelon.png",
+                    "orange": "/static/images/orange.png",
+                    "Papaya": "/static/images/Papaya.png",
+                    "PigeonPeas": "/static/images/PigeonPeas.png",
+                    "pomegranate": "/static/images/pomegranate.png",
+                    "rice": "/static/images/rice.png",
+                    "soyabeans": "/static/images/soyabeans.png",
+                    "watermelon": "/static/images/watermelon.png"
+                  
             };
 
             const cropKey = data.crop.toLowerCase();
